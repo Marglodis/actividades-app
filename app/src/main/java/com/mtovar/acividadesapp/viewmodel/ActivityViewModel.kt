@@ -9,20 +9,20 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 class ActivityViewModel : ViewModel() {
-    private val _activitites = MutableStateFlow<List<Activity>>(emptyList())
-    val activities: StateFlow<List<Activity>> = _activitites.asStateFlow()
+    private val _activities = MutableStateFlow<List<Activity>>(emptyList())
+    val activities: StateFlow<List<Activity>> = _activities.asStateFlow()
 
     private val _selectedActivity = MutableStateFlow<Activity?>(null)
     val selectedActivity: StateFlow<Activity?> = _selectedActivity.asStateFlow()
 
     fun addActivity(activity: Activity) {
-        _activitites.update { currentList ->
+        _activities.update { currentList ->
             currentList + activity
         }
     }
 
     fun updateActivity(activity: Activity) {
-        _activitites.update { currentList ->
+        _activities.update { currentList ->
             currentList.map {
                 if (it.id == activity.id) activity else it
             }
@@ -30,13 +30,13 @@ class ActivityViewModel : ViewModel() {
     }
 
     fun deleteActivity(id: String) {
-        _activitites.update { currentList ->
+        _activities.update { currentList ->
             currentList.filter { it.id != id }
         }
     }
 
     fun getActivityById(id: String): Activity? {
-        return _activitites.value.find { it.id == id }
+        return _activities.value.find { it.id == id }
     }
 
     fun validateActivity(
@@ -45,22 +45,26 @@ class ActivityViewModel : ViewModel() {
         date: String,
         time: String
     ): ValidationResult {
+
+        val trimmedDate = date.trim()
+        val trimmedTime = time.trim()
+
         if (name.isBlank()) {
             return ValidationResult(false, "El nombre no puede estar vacío")
         }
         if (description.isBlank()) {
             return ValidationResult(false, "La descripción no puede estar vacía")
         }
-        if (date.isBlank()) {
+        if (trimmedDate.isBlank()) {
             return ValidationResult(false, "La fecha no puede estar vacía")
         }
-        if (time.isBlank()) {
+        if (trimmedTime.isBlank()) {
             return ValidationResult(false, "La hora no puede estar vacía")
         }
-        if (!date.matches(Regex("\\d{2}/\\d{2}/\\d{4}"))) {
+        if (!trimmedDate.matches(Regex("\\d{2}/\\d{2}/\\d{4}"))) {
             return ValidationResult(false, "La fecha debe estar en el formato dd/mm/yyyy")
         }
-        if (!time.matches(Regex("\\d{2}:\\d{2}"))) {
+        if (!trimmedTime.matches(Regex("\\d{2}:\\d{2}"))) {
             return ValidationResult(false, "La hora debe estar en el formato hh:mm")
         }
         if (description.length < 10) {
@@ -69,6 +73,6 @@ class ActivityViewModel : ViewModel() {
         if (name.length < 5) {
             return ValidationResult(false, "El nombre debe tener al menos 5 caracteres")
         }
-        return ValidationResult(true)
+        return ValidationResult(true, "")
     }
 }
